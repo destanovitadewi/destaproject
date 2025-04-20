@@ -28,7 +28,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "app/api/rating/route.js",
+    "app/api/rating/route.ts",
     "app/layout.tsx",
     "lib/firebase.ts"
   ],

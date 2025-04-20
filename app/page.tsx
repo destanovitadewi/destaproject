@@ -1,11 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
-import Skill from "./components/skill";
-import Portfolio from "./portfolio/page";
-import Contact from "./components/Contact";
+import Skill from './components/skill';
+import Portfolio from './portfolio/page';
+import Contact from './components/Contact';
 import ChatBotPopUp from "./components/ChatBotPopUp";
-import GameInput from "./components/GameInput";
-import GameResult from "./components/GameResult";
+import GameInput from './components/GameInput';
+import GameResult from './components/GameResult';
 
 export default function ProfilePage() {
   const [target, setTarget] = useState(0);

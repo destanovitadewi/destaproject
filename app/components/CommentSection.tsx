@@ -3,10 +3,11 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../../lib/firebase'; // Sesuaikan dengan struktur folder
 import { collection, addDoc, getDocs } from 'firebase/firestore';
+import Image from 'next/image'; // Import Image from Next.js
 
 interface Feedback {
   name: string;
-  rating: string;
+  rating: number;
   message: string;
   id?: string;
 }
@@ -14,7 +15,7 @@ interface Feedback {
 export default function CommentSection() {
   const [feedback, setFeedback] = useState<Feedback[]>([]);
   const [name, setName] = useState<string>('');
-  const [rating, setRating] = useState<string>('');
+  const [rating, setRating] = useState<number>(0); // Update rating to number
   const [message, setMessage] = useState<string>('');
 
   // Mengambil data feedbacks dari Firestore
@@ -36,6 +37,12 @@ export default function CommentSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validasi rating agar selalu angka antara 1 dan 5
+    if (rating < 1 || rating > 5) {
+      alert('Rating harus antara 1 hingga 5');
+      return;
+    }
+
     // Menambah feedback baru ke Firestore
     try {
       const feedbackCollection = collection(db, 'feedbacks');
@@ -43,7 +50,7 @@ export default function CommentSection() {
 
       // Reset form setelah submit
       setName('');
-      setRating('');
+      setRating(0); // Reset to 0
       setMessage('');
 
       // Ambil feedback baru setelah submit
@@ -81,7 +88,7 @@ export default function CommentSection() {
           type="number"
           placeholder="Rating (1-5)"
           value={rating}
-          onChange={(e) => setRating(e.target.value)}
+          onChange={(e) => setRating(Number(e.target.value))} // Convert to number
           required
           min={1}
           max={5}
@@ -103,10 +110,12 @@ export default function CommentSection() {
         {feedback.map((fb, i) => (
           <li key={i} className="p-4 bg-gray-100 rounded shadow flex items-start space-x-4">
             <div className="flex-shrink-0">
-              <img
+              <Image
                 src={`https://api.dicebear.com/7.x/identicon/svg?seed=${fb.name}`}
-                alt="avatar"
-                className="w-10 h-10 rounded-full"
+                alt={`Avatar of ${fb.name}`}
+                width={40} // Set the width of the image
+                height={40} // Set the height of the image
+                className="rounded-full"
               />
             </div>
             <div>

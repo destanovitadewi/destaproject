@@ -1,28 +1,45 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { Send } from 'lucide-react';
+
+interface Feedback {
+  name: string;
+  message: string;
+  rating: number;
+}
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
+  // Tipe data untuk formData dan feedbacks
+  const [formData, setFormData] = useState<{ name: string; message: string; rating: number }>({
     name: '',
     message: '',
     rating: 0,
   });
 
-  const [feedbacks, setFeedbacks] = useState([]);
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
 
+  // Fetch feedbacks dari API
   const fetchFeedbacks = async () => {
-    const res = await fetch('/api/feedback');
-    const data = await res.json();
-    setFeedbacks(data);
+    try {
+      const res = await fetch('/api/feedback');
+      if (!res.ok) {
+        throw new Error('Failed to fetch feedback');
+      }
+      const data: Feedback[] = await res.json();
+      setFeedbacks(data);
+    } catch (error) {
+      console.error('Error fetching feedbacks:', error);
+    }
   };
 
+  // Menarik data feedback saat komponen pertama kali dimuat
   useEffect(() => {
     fetchFeedbacks();
   }, []);
 
-  const handleChange = (e: any) => {
+  // Handler untuk perubahan input form
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -30,29 +47,32 @@ export default function Contact() {
     }));
   };
 
-  const handleSubmit = async (e: any) => {
+  // Handler untuk mengirim form
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch('/api/feedback', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    });
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-    if (res.ok) {
-      alert('Terima kasih atas komentar dan rating Anda!');
-      setFormData({ name: '', message: '', rating: 0 });
-      fetchFeedbacks(); // refresh list
+      if (res.ok) {
+        alert('Terima kasih atas komentar dan rating Anda!');
+        setFormData({ name: '', message: '', rating: 0 });
+        fetchFeedbacks(); // Refresh daftar feedback
+      } else {
+        alert('Gagal mengirim feedback');
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
     }
   };
-  const ratings = feedbacks
-  .map((f: any) => Number(f.rating))
-  .filter((r: number) => !isNaN(r));
 
-const averageRating =
-  ratings.length > 0
-    ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)
-    : 0;
-
+  // Menghitung rating rata-rata
+  const ratings = feedbacks.map((f) => f.rating).filter((r) => !isNaN(r));
+  const averageRating =
+    ratings.length > 0 ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1) : '0';
 
   return (
     <section className="bg-gray-50 py-16">
@@ -104,7 +124,7 @@ const averageRating =
             <h3 className="text-xl font-bold mb-4 text-indigo-700">📝 Komentar & Rating</h3>
             <p className="mb-4">⭐ Rata-rata rating: <strong>{averageRating}</strong> dari {feedbacks.length} pengguna</p>
             <ul className="space-y-4">
-              {feedbacks.map((fb: any, i: number) => (
+              {feedbacks.map((fb, i) => (
                 <li key={i} className="p-4 bg-white rounded shadow">
                   <p><strong>{fb.name}</strong> ({fb.rating}⭐)</p>
                   <p>{fb.message}</p>
